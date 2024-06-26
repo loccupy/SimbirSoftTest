@@ -50,7 +50,7 @@ public class TransactionsListPage {
     }
 
     @Attachment(value = "CSV File")
-    public byte[] getCsvFileInReporter(String fileName) throws Exception {
+    public byte[] sendTransactionDataToAllureReport(String fileName) throws Exception {
         File file = new File(fileName);
         return Files.readAllBytes(Paths.get(file.getAbsolutePath()));
     }
