@@ -13,9 +13,11 @@ public class AccountPage {
     By buttonWithDrawnLocator = By.xpath("//button[@ng-click='withdrawl()']");
     By buttonTransactionsLocator = By.xpath("//button[@ng-click='transactions()']");
     By depositInputFieldLocator = By.xpath("//label[text()='Amount to be Deposited :']//following-sibling::input");
-    By withdrawnInputFieldLocator = By.xpath("//label[text()='Amount to be Withdrawn :']//following-sibling::input");
+    By withDrawlInputFieldLocator = By.xpath("//label[text()='Amount to be Withdrawn :']//following-sibling::input");
     By submitLocator = By.xpath("//button[@type='submit']");
     By amountOnBalanceLocator = By.xpath("//div[@ng-hide='noAccount']//strong[2]");
+    By titleDepositSuccessfulLocator = By.xpath("//span[text()='Deposit Successful']");
+    By titleTransactionSuccessfulLocator = By.xpath("//span[text()='Transaction successful']");
 
     public AccountPage(WebDriverWait wait, WebDriver driver) {
         this.wait = wait;
@@ -36,24 +38,32 @@ public class AccountPage {
         wait.until(ExpectedConditions.elementToBeClickable(buttonTransactionsLocator)).click();
     }
 
-    public AccountPage sendAmountInFieldDeposit(String amount) {
+    public AccountPage sendAmountInFieldDepositAndClickSubmit(String amount) {
+        int oldBalance = Integer.parseInt(driver.findElement(amountOnBalanceLocator).getText());
+
         wait.until(ExpectedConditions.presenceOfElementLocated(depositInputFieldLocator))
                 .sendKeys(amount);
-        return this;
-    }
-
-    public AccountPage sendAmountInFieldWithDrawn(String amount) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(withdrawnInputFieldLocator))
-                .sendKeys(amount);
-        return this;
-    }
-
-    public AccountPage clickSubmit() {
         driver.findElement(submitLocator).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(titleDepositSuccessfulLocator));
+
+        wait.until(ExpectedConditions.textToBe(amountOnBalanceLocator, String.valueOf(oldBalance + Integer.parseInt(amount))));
+        return this;
+    }
+
+    public AccountPage sendAmountInFieldWithDrawlAndClickSubmit(String amount) {
+        int oldBalance = Integer.parseInt(driver.findElement(amountOnBalanceLocator).getText());
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(withDrawlInputFieldLocator))
+                .sendKeys(amount);
+        driver.findElement(submitLocator).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(titleTransactionSuccessfulLocator));
+
+        wait.until(ExpectedConditions.textToBe(amountOnBalanceLocator, String.valueOf(oldBalance - Integer.parseInt(amount))));
         return this;
     }
 
     public Integer getBalance() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(amountOnBalanceLocator));
         return Integer.parseInt(driver.findElement(amountOnBalanceLocator).getText());
     }
 }
