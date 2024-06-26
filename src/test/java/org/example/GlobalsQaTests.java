@@ -44,6 +44,7 @@ public class GlobalsQaTests extends TestConfig {
     CustomerPage customerPage;
     AccountPage accountPage;
     String amount;
+    Integer oldBalance;
 
     @BeforeEach
     void before() {
@@ -66,27 +67,27 @@ public class GlobalsQaTests extends TestConfig {
                         .clickButtonLogin());
 
         accountPage = new AccountPage(wait, driver);
+        oldBalance = step("Получить баланс", () ->
+                accountPage.getBalance());
         amount = getAmountWithFibonacci();
-        step("Перейти в аккаунт, выполнить пополнение и снятие", () ->
+        step("Перейти в аккаунт, выполнить пополнение и снятие одинаковой суммы", () ->
                 accountPage
                         .clickButtonDeposit()
-                        .sendAmountInFieldDeposit(amount)
-                        .clickSubmit()
+                        .sendAmountInFieldDepositAndClickSubmit(amount)
                         .clickButtonWithDrawn()
-                        .sendAmountInFieldWithDrawn(amount)
-                        .clickSubmit());
+                        .sendAmountInFieldWithDrawlAndClickSubmit(amount));
     }
 
     @Test
-    @DisplayName("Проверка баланса после проведения пополнения и снятия")
+    @DisplayName("Проверка баланса после проведения пополнения и снятия с одинаковой суммой")
     public void checkBalanceTest() {
-        int balance = step("Получить значение баланса после проведения пополнения и снятия", () ->
+        Integer newBalance = step("Получить значение баланса", () ->
                 accountPage.getBalance());
 
         step("Сравнить значения баланса с ожидаемым результатом", () -> {
-            assertThat(balance)
-                    .as("Баланс не равен нулю")
-                    .isEqualTo(0);
+            assertThat(newBalance)
+                    .as("Баланс не соответствует ожидаемой сумме")
+                    .isEqualTo(oldBalance);
         });
     }
 
@@ -122,7 +123,7 @@ public class GlobalsQaTests extends TestConfig {
         String dataSecondTransaction = step("Получить дату второй транзакции", () ->
                 actualValue.get(1).get(DATE.getDescription()));
 
-        step("Сравнить значения в таблице с ожидаемым результатом", () -> {
+        step("Сравнить полученные из таблицы значения с ожидаемым результатом", () -> {
             assertions
                     .assertThat(numberOfTransactions)
                     .as("Количество транзакций не соответствует")
@@ -153,6 +154,7 @@ public class GlobalsQaTests extends TestConfig {
                     .contains(expectedDate);
         });
         assertions.assertAll();
+
         transactionsListPage.sendTransactionDataToAllureReport(PATH_TO_CSV);
     }
 }
