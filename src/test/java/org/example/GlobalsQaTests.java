@@ -20,8 +20,18 @@ import java.util.List;
 import java.util.Locale;
 
 
+import static constants.Constants.GLOBALQA_URL;
+import static constants.Constants.DATE_FORMAT_WITHOUT_TIME;
+import static constants.Constants.RU_LOCAL;
+import static constants.Constants.TWO_TRANSACTIONS;
+import static constants.Constants.TRANSACTION_TYPE_CREDIT;
+import static constants.Constants.TRANSACTION_TYPE_DEBIT;
+import static constants.Constants.PATH_TO_CSV;
 import static io.qameta.allure.Allure.step;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static utils.TransactionDetails.TYPE;
+import static utils.TransactionDetails.AMOUNT;
+import static utils.TransactionDetails.DATE;
 import static utils.Utils.getAmountWithFibonacci;
 import static utils.Utils.writeFileCsv;
 
@@ -41,7 +51,7 @@ public class GlobalsQaTests extends TestConfig {
         wait = getWait();
 
         step("Открыть первую страницу сайта", () ->
-                driver.get("https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login;"));
+                driver.get(GLOBALQA_URL));
 
         loginPage = new LoginPage(wait, driver);
         step("Нажать кнопку Customer Login", () ->
@@ -85,7 +95,7 @@ public class GlobalsQaTests extends TestConfig {
     public void checkTransactionsTableTest() throws Exception {
         SoftAssertions assertions = new SoftAssertions();
         String expectedDate = LocalDate.now()
-                .format(DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("ru")));
+                .format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITHOUT_TIME, new Locale(RU_LOCAL)));
 
         step("Перейти на страницу с таблицей проведенных транзакций", () ->
                 accountPage.clickButtonTransactions());
@@ -100,23 +110,23 @@ public class GlobalsQaTests extends TestConfig {
 
         int numberOfTransactions = step("Получить количество транзакций", actualValue::size);
         String typeFirstTransaction = step("Получить тип первой транзакции", () ->
-                actualValue.get(0).get("type"));
+                actualValue.get(0).get(TYPE.getDescription()));
         String amountFirstTransaction = step("Получить сумму первой транзакции", () ->
-                actualValue.get(0).get("amount"));
+                actualValue.get(0).get(AMOUNT.getDescription()));
         String typeSecondTransaction = step("Получить тип второй транзакции", () ->
-                actualValue.get(1).get("type"));
+                actualValue.get(1).get(TYPE.getDescription()));
         String amountSecondTransaction = step("Получить сумму второй транзакции", () ->
-                actualValue.get(1).get("amount"));
+                actualValue.get(1).get(AMOUNT.getDescription()));
         String dataFirstTransaction = step("Получить дату первой транзакции", () ->
-                actualValue.get(0).get("date"));
+                actualValue.get(0).get(DATE.getDescription()));
         String dataSecondTransaction = step("Получить дату второй транзакции", () ->
-                actualValue.get(1).get("date"));
+                actualValue.get(1).get(DATE.getDescription()));
 
         step("Сравнить значения в таблице с ожидаемым результатом", () -> {
             assertions
                     .assertThat(numberOfTransactions)
                     .as("Количество транзакций не соответствует")
-                    .isEqualTo(2);
+                    .isEqualTo(TWO_TRANSACTIONS);
             assertions
                     .assertThat(amountFirstTransaction)
                     .as("Сумма первой транзакции не соответствует")
@@ -128,11 +138,11 @@ public class GlobalsQaTests extends TestConfig {
             assertions
                     .assertThat(typeFirstTransaction)
                     .as("Тип первой транзакции не соответствует")
-                    .isEqualTo("Credit");
+                    .isEqualTo(TRANSACTION_TYPE_CREDIT);
             assertions
                     .assertThat(typeSecondTransaction)
                     .as("Тип второй транзакции не соответствует")
-                    .isEqualTo("Debit");
+                    .isEqualTo(TRANSACTION_TYPE_DEBIT);
             assertions
                     .assertThat(dataFirstTransaction)
                     .as("Дата транзакции не соответствует")
@@ -143,6 +153,6 @@ public class GlobalsQaTests extends TestConfig {
                     .contains(expectedDate);
         });
         assertions.assertAll();
-        transactionsListPage.sendTransactionDataToAllureReport("src/test/resources/new.csv");
+        transactionsListPage.sendTransactionDataToAllureReport(PATH_TO_CSV);
     }
 }
