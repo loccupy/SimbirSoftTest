@@ -108,7 +108,7 @@ public class GlobalsQaTests extends TestConfig {
         String amountSecondTransaction = step("Получить сумму второй транзакции", () ->
                 actualValue.get(1).get("amount"));
         String dataFirstTransaction = step("Получить дату первой транзакции", () ->
-                        actualValue.get(0).get("date"));
+                actualValue.get(0).get("date"));
         String dataSecondTransaction = step("Получить дату второй транзакции", () ->
                 actualValue.get(1).get("date"));
 
@@ -143,6 +143,6 @@ public class GlobalsQaTests extends TestConfig {
                     .contains(expectedDate);
         });
         assertions.assertAll();
-        transactionsListPage.getCsvFileInReporter("src/test/resources/new.csv");
+        transactionsListPage.sendTransactionDataToAllureReport("src/test/resources/new.csv");
     }
 }
